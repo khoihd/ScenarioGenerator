@@ -13,16 +13,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
-import java.util.Set;
 import java.util.function.Supplier;
 
 public class ScenarioGenerator {  
-  public static final int NUMBER_OF_INSTANCES = 20;
+  public static final int NUMBER_OF_INSTANCES = 1;
   
   public static final int NUMBER_OF_AGENTS = 10;
   
@@ -30,13 +28,19 @@ public class ScenarioGenerator {
   
   public static final int NUMBER_OF_SERVICES = 3;
   
-  public static final int NUMBER_OF_DCOP_DEMAND_PER_SERVICE = 20;
+  public static final int NUMBER_OF_DCOP_DEMAND_PER_SERVICE = 10;
   
   public static final String DIRECTORY = "scenario/random-network/d" + NUMBER_OF_AGENTS + "/";
 
   public static final Random rand = new Random();
   
-  public static final Map<String, Set<String>> edgeMap = new HashMap<>();
+  public static final int NUMBER_OF_CLIENTS_PER_POOL = 200;
+  
+  public static final double TASK_CONTAINER = 0.1;
+  
+  public static final int TIME_BETWEEN_REQUESTS = 60000; // milliseconds
+  
+//  public static final Map<String, Set<String>> edgeMap = new HashMap<>();
 
   public static void main(String[] args) throws IOException {    
     for (int instanceID = 0; instanceID < NUMBER_OF_INSTANCES; instanceID++) {
@@ -52,14 +56,56 @@ public class ScenarioGenerator {
       }
       
       generateGraph(instanceID, clientList, NUMBER_OF_AGENTS);
+//      generateSingleGraph(instanceID);
     }
   }
   
-  public static void generateSingleGraph(int instanceID) {
+  
+  //           / - B - \
+  // Server - A         Client
+  //           \ - C - /
+  public static void generateSingleGraph(int instanceID) throws IOException {
     List<String> nodes = new ArrayList<>();
     List<String[]> edges = new ArrayList<>();
+    List<String> clientList = new ArrayList<>();
     
+    String client = "Client";
+    String a = "A";
+    String b = "B";
+    String c = "C";
+    String server = "Server";
     
+    nodes.add(client); nodes.add(a); nodes.add(b); nodes.add(c); nodes.add(server);
+    clientList.add(client);
+    
+    Graph<String, DefaultEdge> graph = new SimpleGraph<>(DefaultEdge.class);
+    for (String node : nodes) {
+      graph.addVertex(node);
+    }
+    // Server - A
+    edges.add(new String[]{server, a});
+    graph.addEdge(server, a);
+    
+    // A - B
+    edges.add(new String[]{a, b});
+    graph.addEdge(a, b);
+    
+    // A - C
+    edges.add(new String[]{a, c});
+    graph.addEdge(a, c);
+    
+    // B - Client
+    edges.add(new String[]{b, client});
+    graph.addEdge(b, client);
+    
+    // C- Client
+    edges.add(new String[]{c, client});
+    graph.addEdge(c, client);
+    
+    ConnectivityInspector<String, DefaultEdge> inspector = new ConnectivityInspector<>(graph);
+    System.out.println("Instance ID=" + instanceID + ": " + inspector.isConnected());
+    
+    createScenarioAndDemandFile(server, clientList, nodes, edges, instanceID);
   }
   
   /** 
@@ -83,16 +129,16 @@ public class ScenarioGenerator {
       edges.add(edgeList);
     }
     
-    for (int one = 0; one < nodes.size() - 1; one++) {
-      String nodeOne = nodes.get(one);
-      for (int two = one + 1; two < nodes.size(); two++) {
-        String nodeTwo = nodes.get(two);
-        
-        Set<String> edgeOne = edgeMap.getOrDefault(nodeOne, new HashSet<>());
-        edgeOne.add(nodeTwo);
-        edgeMap.put(nodeOne, edgeOne);
-      }
-    }
+//    for (int one = 0; one < nodes.size() - 1; one++) {
+//      String nodeOne = nodes.get(one);
+//      for (int two = one + 1; two < nodes.size(); two++) {
+//        String nodeTwo = nodes.get(two);
+//        
+//        Set<String> edgeOne = edgeMap.getOrDefault(nodeOne, new HashSet<>());
+//        edgeOne.add(nodeTwo);
+//        edgeMap.put(nodeOne, edgeOne);
+//      }
+//    }
     
     ConnectivityInspector<String, DefaultEdge> inspector = new ConnectivityInspector<>(randomGraph);
     System.out.println("Instance ID=" + instanceID + ": " + inspector.isConnected());
@@ -189,21 +235,28 @@ public class ScenarioGenerator {
     }
     topology += "# Links\n";
     
-    for (Entry<String, Set<String>> entry : edgeMap.entrySet()) {
-      String nodeOne = entry.getKey();
-      
-      for (String nodeTwo : entry.getValue()) {
-        String[] temp1 = new String[] {nodeOne, nodeTwo};
-        String[] temp2 = new String[] {nodeTwo, nodeOne};
-        
-        if (contains(edgeList, temp1) || contains(edgeList, temp2)) {
-          topology += "set link" + nodeOne + nodeTwo + " [$ns duplex-link $node" + nodeOne + " $node"
-              + nodeTwo + " 100000.0kb 0.0ms DropTail]\n";
-        } else {
-          topology += "set link" + nodeOne + nodeTwo + " [$ns duplex-link $node" + nodeOne + " $node"
-              + nodeTwo + " 900000.0kb 0.0ms DropTail]\n";
-        }
-      }
+//    for (Entry<String, Set<String>> entry : edgeMap.entrySet()) {
+//      String nodeOne = entry.getKey();
+//      
+//      for (String nodeTwo : entry.getValue()) {
+//        String[] temp1 = new String[] {nodeOne, nodeTwo};
+//        String[] temp2 = new String[] {nodeTwo, nodeOne};
+//        
+//        if (contains(edgeList, temp1) || contains(edgeList, temp2)) {
+//          topology += "set link" + nodeOne + nodeTwo + " [$ns duplex-link $node" + nodeOne + " $node"
+//              + nodeTwo + " 100000.0kb 0.0ms DropTail]\n";
+//        } else {
+//          topology += "set link" + nodeOne + nodeTwo + " [$ns duplex-link $node" + nodeOne + " $node"
+//              + nodeTwo + " 900000.0kb 0.0ms DropTail]\n";
+//        }
+//      }
+//    }
+    
+    for (String[] edge : edgeList) {
+      String nodeOne = edge[0];
+      String nodeTwo = edge[1];
+
+      topology += "set link" + nodeOne + nodeTwo + " [$ns duplex-link $node" + nodeOne + " $node" + nodeTwo + " 100000.0kb 0.0ms DropTail]\n";
     }
     
     topology += "\n";
@@ -307,16 +360,16 @@ public class ScenarioGenerator {
       for (int serviceID = 1; serviceID <= NUMBER_OF_SERVICES; serviceID++) {
         demand += " {\n"
                 + "\t\"startTime\": " + startTime + ",\n"
-                + "\t\"serverDuration\": 500000,\n"
-                + "\t\"networkDuration\": 500000,\n"
-                + "\t\"numClients\": 20,\n"
+                + "\t\"serverDuration\": " + TIME_BETWEEN_REQUESTS + ",\n"
+                + "\t\"networkDuration\": " + TIME_BETWEEN_REQUESTS + ",\n"
+                + "\t\"numClients\": " + NUMBER_OF_CLIENTS_PER_POOL + ",\n"
                 + "\t\"service\": {\n"
                 +  "\t  \"group\": \"com.bbn\",\n"
                 + "\t  \"artifact\": \"test-service" + serviceID + "\",\n"
                 + "\t  \"version\": \"1\"\n"
                 + "\t},\n"
                 + "\t\"nodeLoad\": {\n"
-                + "\t  \"TASK_CONTAINERS\": 0.1\n"
+                + "\t  \"TASK_CONTAINERS\": " + 0.1 + "\n"
                 + "\t},\n"
                 + "\t\"networkLoad\": {\n"
                 + "\t  \"DATARATE_TX\": 0.001,\n"
@@ -327,7 +380,7 @@ public class ScenarioGenerator {
             demand += ",\n";
           }
         }
-      startTime += 60000;
+      startTime += TIME_BETWEEN_REQUESTS;
     }
     demand += "\n]";
     
