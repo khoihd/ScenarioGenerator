@@ -64,16 +64,15 @@ public class ScenarioGenerator {
   public static void main(String[] args) throws IOException {
     String topology = "random-network";
     int agent = 10;
-    int instanceID = 1;
-    
+    for (int instanceID = 0; instanceID <= 19; instanceID++) {
 //    String CURRENT_DIRECTORY = "/Users/khoihd/Downloads/comparison_new_config/RDIFF/";
 //    String DIRECTORY = CURRENT_DIRECTORY + "scenario/" + topology + "/d" + agent + "/";
-    
-    String DIRECTORY = "/Users/khoihd/Downloads/";
-    String serviceConfig = DIRECTORY + instanceID + "/service-configurations.json"; 
-    modifyServiceConfigWithJonSuggestion(serviceConfig, agent);
-    String demandPath = DIRECTORY + instanceID + "/Demand";
-    modifyDemand(demandPath);
+      String DIRECTORY = "/Users/khoihd/Downloads/d10/";
+      String serviceConfig = DIRECTORY + instanceID + "/service-configurations.json"; 
+      modifyServiceConfigWithJonSuggestion(serviceConfig, agent);
+      String demandPath = DIRECTORY + instanceID + "/Demand";
+      modifyDemand(demandPath);
+    }
   }
   
   
