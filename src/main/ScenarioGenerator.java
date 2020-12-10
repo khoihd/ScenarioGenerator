@@ -28,7 +28,7 @@ import java.util.regex.Pattern;
 public class ScenarioGenerator {  
   public static final int NUMBER_OF_INSTANCES = 20;
   
-  public static final int[] NUMBER_OF_AGENTS = {5, 10, 15, 20};
+  public static final int[] NUMBER_OF_AGENTS = {15};
   
   public static final int NUMBER_OF_CLIENTS = 3;
   
@@ -36,7 +36,7 @@ public class ScenarioGenerator {
   
   public static final int NUMBER_OF_SERVICES = 1;
   
-  public static final int NUMBER_OF_DCOP_DEMAND_PER_SERVICE = 10;
+  public static final int NUMBER_OF_DEMAND_BATCH_PER_SERVICE = 30;
   
   public static final String[] TOPOLOGY = {"random-network", "scale-free-tree"};
 //  public static final String TOPOLOGY = "scale-free-tree";
@@ -62,16 +62,16 @@ public class ScenarioGenerator {
   private static int TIME_BETWEEN_REQUEST_BATCHES = 60000;
 
   public static void main(String[] args) throws IOException {
-    String topology = "random-network";
-    int agent = 10;
-    for (int instanceID = 0; instanceID <= 19; instanceID++) {
-//    String CURRENT_DIRECTORY = "/Users/khoihd/Downloads/comparison_new_config/RDIFF/";
-//    String DIRECTORY = CURRENT_DIRECTORY + "scenario/" + topology + "/d" + agent + "/";
-      String DIRECTORY = "/Users/khoihd/Downloads/d10/";
-      String serviceConfig = DIRECTORY + instanceID + "/service-configurations.json"; 
-      modifyServiceConfigWithJonSuggestion(serviceConfig, agent);
-      String demandPath = DIRECTORY + instanceID + "/Demand";
-      modifyDemand(demandPath);
+    for (String topology : TOPOLOGY) {
+	    for (int agent : NUMBER_OF_AGENTS) {
+		    for (int instanceID = 0; instanceID <= 19; instanceID++) {
+		      String DIRECTORY = "/Users/khoihd/Downloads/scenario/" + topology + "/d" + agent + "/";
+		      String serviceConfig = DIRECTORY + instanceID + "/service-configurations.json"; 
+		      modifyServiceConfigWithJonSuggestion(serviceConfig, agent);
+		      String demandPath = DIRECTORY + instanceID + "/Demand";
+		      modifyDemand(demandPath);
+		    }
+	    }
     }
   }
   
@@ -247,7 +247,7 @@ public class ScenarioGenerator {
   public static String demandGenerator() {
     String demand = "[\n";
     int startTime = 30000;
-    for (int i = 0; i < NUMBER_OF_DCOP_DEMAND_PER_SERVICE; i++) {
+    for (int i = 0; i < NUMBER_OF_DEMAND_BATCH_PER_SERVICE; i++) {
       for (int serviceID = 1; serviceID <= NUMBER_OF_SERVICES; serviceID++) {
         demand += " {\n"
                 + "\t\"startTime\": " + startTime + ",\n"
@@ -267,7 +267,7 @@ public class ScenarioGenerator {
                 + "\t  \"DATARATE_RX\": " + RX_RATE + "\n"
                 + "\t}\n"
                 +" }";
-          if (serviceID != NUMBER_OF_SERVICES || i != NUMBER_OF_DCOP_DEMAND_PER_SERVICE - 1) {
+          if (serviceID != NUMBER_OF_SERVICES || i != NUMBER_OF_DEMAND_BATCH_PER_SERVICE - 1) {
             demand += ",\n";
           }
         }
