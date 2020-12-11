@@ -1,11 +1,5 @@
 package main;
 
-import org.jgrapht.*;
-import org.jgrapht.alg.connectivity.ConnectivityInspector;
-import org.jgrapht.generate.GnpRandomGraphGenerator;
-import org.jgrapht.graph.*;
-import org.jgrapht.util.SupplierUtil;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -18,6 +12,14 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.function.Supplier;
+
+import org.jgrapht.Graph;
+import org.jgrapht.alg.connectivity.ConnectivityInspector;
+import org.jgrapht.generate.GnpRandomGraphGenerator;
+import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.SimpleGraph;
+import org.jgrapht.util.SupplierUtil;
+
 
 public class ScenarioGenerator {  
   public static final int NUMBER_OF_INSTANCES = 1;
