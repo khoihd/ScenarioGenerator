@@ -22,13 +22,12 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Supplier;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
 
 public class ScenarioGenerator {  
   public static final int NUMBER_OF_INSTANCES = 20;
   
-  public static final int[] NUMBER_OF_AGENTS = {15};
+  public static final int[] NUMBER_OF_AGENTS = {20};
   
   public static final int NUMBER_OF_CLIENTS = 3;
   
@@ -38,7 +37,7 @@ public class ScenarioGenerator {
   
   public static final int NUMBER_OF_DEMAND_BATCH_PER_SERVICE = 30;
   
-  public static final String[] TOPOLOGY = {"random-network", "scale-free-tree"};
+  public static final String[] TOPOLOGY = {"random-network"};
 //  public static final String TOPOLOGY = "scale-free-tree";
   
   public static final int REQUEST_DURATION = 60000; // 60 seconds = 1 minute
